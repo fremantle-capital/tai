@@ -51,9 +51,12 @@ defmodule Tai.Mixfile do
       {:websockex, "~> 0.4"},
       {:confex, "~> 3.4"},
       {:ecto, "~> 3.1"},
+      {:etso, "~> 0.1.1"},
+      # This is probably going to need to use the fork that supports ecto v3
+      # {:ecto_atom, "~> 1.0"},
       {:jason, "~> 1.1"},
       {:vex, "~> 0.7"},
-      {:stored, "~> 0.0.4"},
+      {:stored, "~> 0.0.6"},
       # {:tai_events, path: "../../packages/tai_events"},
       {:tai_events, "~> 0.0.1"},
       {:logger_file_backend_with_formatters, "~> 0.0.1", only: [:dev, :test]},

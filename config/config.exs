@@ -1,5 +1,9 @@
 use Mix.Config
 
+# Datastore
+config :workbench, ecto_repos: [Tai.Repo]
+
+# Logger
 config :logger,
   backends: [{LoggerFileBackendWithFormatters, :file_log}],
   utc_log: true

@@ -29,55 +29,6 @@ defmodule Tai.Trading.OrderStore do
     GenServer.start_link(__MODULE__, state, name: name)
   end
 
-  def init(state), do: {:ok, state, {:continue, :init}}
-
-  def handle_continue(:init, state) do
-    :ok = state.backend.create(state.name)
-    {:noreply, state}
-  end
-
-  def handle_call({:enqueue, submission}, _from, state) do
-    order = OrderSubmissions.Factory.build!(submission)
-    response = state.backend.insert(order, state.name)
-    {:reply, response, state}
-  end
-
-  def handle_call({:update, action}, _from, state) do
-    response =
-      with {:ok, old_order} <- state.backend.find_by_client_id(action.client_id, state.name) do
-        required = action |> OrderStore.Action.required() |> List.wrap()
-
-        if Enum.member?(required, old_order.status) do
-          new_attrs =
-            action
-            |> OrderStore.Action.attrs()
-            |> normalize_attrs(old_order, action)
-            |> Map.put(:updated_at, Timex.now())
-
-          updated_order = old_order |> Map.merge(new_attrs)
-          state.backend.update(updated_order, state.name)
-          {:ok, {old_order, updated_order}}
-        else
-          reason = {:invalid_status, old_order.status, required |> format_required, action}
-          {:error, reason}
-        end
-      else
-        {:error, :not_found} -> {:error, {:not_found, action}}
-      end
-
-    {:reply, response, state}
-  end
-
-  def handle_call(:all, _from, state) do
-    response = state.backend.all(state.name)
-    {:reply, response, state}
-  end
-
-  def handle_call({:find_by_client_id, client_id}, _from, state) do
-    response = state.backend.find_by_client_id(client_id, state.name)
-    {:reply, response, state}
-  end
-
   @doc """
   Enqueue an order from the submission by adding it into the backend
   """
@@ -130,6 +81,55 @@ defmodule Tai.Trading.OrderStore do
 
   @spec to_name(store_id) :: atom
   def to_name(store_id), do: :"#{__MODULE__}_#{store_id}"
+
+  def init(state), do: {:ok, state, {:continue, :init}}
+
+  def handle_continue(:init, state) do
+    :ok = state.backend.create(state.name)
+    {:noreply, state}
+  end
+
+  def handle_call({:enqueue, submission}, _from, state) do
+    order = OrderSubmissions.Factory.build!(submission)
+    response = state.backend.insert(order, state.name)
+    {:reply, response, state}
+  end
+
+  def handle_call({:update, action}, _from, state) do
+    response =
+      with {:ok, old_order} <- state.backend.find_by_client_id(action.client_id, state.name) do
+        required = action |> OrderStore.Action.required() |> List.wrap()
+
+        if Enum.member?(required, old_order.status) do
+          new_attrs =
+            action
+            |> OrderStore.Action.attrs()
+            |> normalize_attrs(old_order, action)
+            |> Map.put(:updated_at, Timex.now())
+
+          updated_order = old_order |> Map.merge(new_attrs)
+          state.backend.update(updated_order, state.name)
+          {:ok, {old_order, updated_order}}
+        else
+          reason = {:invalid_status, old_order.status, required |> format_required, action}
+          {:error, reason}
+        end
+      else
+        {:error, :not_found} -> {:error, {:not_found, action}}
+      end
+
+    {:reply, response, state}
+  end
+
+  def handle_call(:all, _from, state) do
+    response = state.backend.all(state.name)
+    {:reply, response, state}
+  end
+
+  def handle_call({:find_by_client_id, client_id}, _from, state) do
+    response = state.backend.find_by_client_id(client_id, state.name)
+    {:reply, response, state}
+  end
 
   defp normalize_attrs(
          update_attrs,
