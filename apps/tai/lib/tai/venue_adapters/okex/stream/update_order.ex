@@ -1,11 +1,6 @@
 defmodule Tai.VenueAdapters.OkEx.Stream.UpdateOrder do
   alias Tai.NewOrders.OrderTransitionWorker
 
-  @canceled "-1"
-  @pending "0"
-  @partially_filled "1"
-  @fully_filled "2"
-
   @date_format "{ISO:Extended:Z}"
 
   def apply(
@@ -43,6 +38,11 @@ defmodule Tai.VenueAdapters.OkEx.Stream.UpdateOrder do
       received_at: last_received_at
     })
   end
+
+  @canceled "-1"
+  @pending "0"
+  @partially_filled "1"
+  @fully_filled "2"
 
   defp transition_type(s) when s == @canceled, do: {:ok, :cancel}
   defp transition_type(s) when s == @pending, do: {:ok, :open}

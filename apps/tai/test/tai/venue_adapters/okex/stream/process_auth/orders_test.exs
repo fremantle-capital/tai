@@ -1,4 +1,4 @@
-defmodule Tai.VenueAdapters.OkEx.Stream.ProcessAuth.OrderTest do
+defmodule Tai.VenueAdapters.OkEx.Stream.ProcessAuth.OrdersTest do
   use Tai.TestSupport.DataCase, async: false
   import Tai.TestSupport.Assertions.Event
   alias Tai.VenueAdapters.OkEx.Stream.ProcessAuth
